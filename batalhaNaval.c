@@ -1,9 +1,9 @@
 #include <stdio.h>
 
+
 int main() {
     // 1. represente o tabuleiro
     int tabuleiro[10][10];
-
     // vetor de caracteres para as colunas de A ate J
     char colunas[10] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'};
 
@@ -14,93 +14,115 @@ int main() {
         }
     }
 
-    // 2. posicione os navios
-    int linha_horiz = 2, col_horiz = 4;
-    int linha_vert = 5, col_vert = 8;
-    int linha_diag1 = 0, col_diag1 = 0;
-    int linha_diag2 = 7, col_diag2 = 2;
+    //parte nível mestre
 
-    int pode_posicionar; // variavel para guardar o resultado da validação
+  int cone[5][5];
+    int cruz[5][5];
+    int octaedro[5][5];
 
-    // posicionando o navio horizontal (tamanho 3)
-    pode_posicionar = 1;
-    if (col_horiz + 3 > 10) {
-        pode_posicionar = 0; //fora dos limites
-    } else {
-        for (int i = 0; i < 3; i++) {
-            if (tabuleiro[linha_horiz][col_horiz + i] != 0) pode_posicionar = 0; // sobreposicao
-        }
-    }
-    if (pode_posicionar == 1) {
-        for (int i = 0; i <3; i++) {
-            tabuleiro[linha_horiz][col_horiz + i] = 3;
-        }
-    }
+    // construção das matrizes de área de efeito utilizando condicionais
+    for (int i = 0; i < 5; i++) {
+        for (int j = 0; j < 5; j++) {
 
-    //navio verticaL
-    pode_posicionar = 1;
-    if (linha_vert + 3 > 10) {
-        pode_posicionar = 0;
-    } else {
-        for (int i = 0; i < 3; i++) {
-            if (tabuleiro[linha_vert + i][col_vert] != 0) pode_posicionar = 0;
-        }
-    }
-    if (pode_posicionar == 1) {
-        for (int i = 0; i <3; i++) {
-            tabuleiro[linha_vert + i][col_vert] = 3;
-        }
-    }
-    //posicione o primeiro navio diagonal (linha aumenta, coluna aumenta
-    pode_posicionar = 1;
-    if (linha_diag1 + 3 > 10 || col_diag1 + 3 > 10) {
-        pode_posicionar = 0;
-    } else {
-        for (int i = 0; i < 3; i++) {
-            if (tabuleiro[linha_diag1 + i][col_diag1 + i] != 0) pode_posicionar = 0;
-        }
-    }
-    if (pode_posicionar == 1) {
-        for (int i = 0; i <3; i++) {
-            tabuleiro[linha_diag1 + i][col_diag1 + i] = 3;
-        }
-    }
-    //pocisionar o segundo navio diagonal (linha aumenta, coluna diminui
-    pode_posicionar = 1;
-    //verifica se a linha passa de 9 e se a coluna fica menor que 0
-    if (linha_diag2 + 3 > 10 || col_diag2 - 2 < 0) {
-        pode_posicionar = 0;
-    } else {
-        for (int i = 0; i < 3; i++) {
-            if (tabuleiro[linha_diag2 + i][col_diag2 - i] != 0) pode_posicionar = 0;
-        }
-    }
-    if (pode_posicionar == 1) {
-        for (int i = 0; i <3; i++) {
-            tabuleiro[linha_diag2 + i][col_diag2 - i] = 3;
+            // Lógica do Cone (Exata forma do exemplo do professor)
+            if (i < 3 && j >= (2 - i) && j <= (2 + i)) {
+                cone[i][j] = 1;
+            } else {
+                cone[i][j] = 0;
+            }
+
+            // Lógica da Cruz
+            if (i == 2 || j == 2) {
+                cruz[i][j] = 1;
+            } else {
+                cruz[i][j] = 0;
+            }
+
+            // Lógica do Octaedro (Losango)
+            int dist_i = i - 2;
+            if (dist_i < 0) dist_i = -dist_i;
+
+            int dist_j = j - 2;
+            if (dist_j < 0) dist_j = -dist_j;
+
+            if (dist_i + dist_j <= 2) {
+                octaedro[i][j] = 1;
+            } else {
+                octaedro[i][j] = 0;
+            }
         }
     }
 
-    //exibir o tabuleiro
-    printf("\ntabuleiro de batalha naval (nivel aventureiro)\n\n");
+    // definindo pontos de origem SEGUROS (longe o suficiente das bordas para não cortar as matrizes 5x5)
+    int origem_cone_l = 7, origem_cone_c = 2;
+    int origem_cruz_l = 2, origem_cruz_c = 3;
+    int origem_octaedro_l = 5, origem_octaedro_c = 7;
 
-    //imprimir o titulo das colunas (letras de A ate J)
-    printf("   ");
+    // sobrepondo o cone (usa o número 1)
+    for (int i = 0; i < 5; i++) {
+        for (int j = 0; j < 5; j++) {
+            if (cone[i][j] == 1) {
+                int l = origem_cone_l + (i - 2);
+                int c = origem_cone_c + (j - 2);
+
+                // condiciinal exigida: garante que só desenha se estiver dentro dos limites do tabuleiro
+                if (l >= 0 && l < 10 && c >= 0 && c < 10) {
+                    tabuleiro[l][c] = 1;
+                }
+            }
+        }
+    }
+
+    // cruz (usa o número 3)
+    for (int i = 0; i < 5; i++) {
+        for (int j = 0; j < 5; j++) {
+            if (cruz[i][j] == 1) {
+                int l = origem_cruz_l + (i - 2);
+                int c = origem_cruz_c + (j - 2);
+
+                if (l >= 0 && l < 10 && c >= 0 && c < 10) {
+                    tabuleiro[l][c] = 3;
+                }
+            }
+        }
+    }
+
+    // octaedro (usa o número 2)
+    for (int i = 0; i < 5; i++) {
+        for (int j = 0; j < 5; j++) {
+            if (octaedro[i][j] == 1) {
+                int l = origem_octaedro_l + (i - 2);
+                int c = origem_octaedro_c + (j - 2);
+
+                if (l >= 0 && l < 10 && c >= 0 && c < 10) {
+                    tabuleiro[l][c] = 2;
+                }
+            }
+        }
+    }
+
+    // exibir o tabuliro atualizado
+    printf("\nTabuleiro de Batalha Naval (Nivel Mestre)\n\n");
+
+    // título das colunas
+    printf("    ");
     for (int j = 0; j < 10; j++) {
-        printf("%c ", colunas[j]);
+        printf(" %c ", colunas[j]);
     }
     printf("\n");
 
-    //imprimir as linhas (numero de conteudo da matriz)
+    // linhas e matriz
     for (int i = 0; i < 10; i++) {
-        printf("%2d ", i + 1);
+        printf(" %2d ", i + 1);
 
         for (int j = 0; j < 10; j++) {
-            printf("%d ", tabuleiro[i][j]);
+            printf(" %d ", tabuleiro[i][j]);
         }
         printf("\n");
     }
     printf("\n");
-return 0;
 
+    return 0;
 }
+
+//considerações finais: graças a deusa existe o for porque eu teria demorado mais 3 horas pra escrever linha por linha do tabuleirokkkk
